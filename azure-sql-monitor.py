@@ -1,3 +1,9 @@
+🔧 Prerequisites
+#Install Python packages:
+pip install azure-identity azure-mgmt-monitor azure-mgmt-resource
+#Create a Service Principal (if not already):
+az ad sp create-for-rbac --name "azsql-monitor" --role "Reader" --scopes /subscriptions/<your-subscription-id>
+
 from azure.identity import ClientSecretCredential
 from azure.mgmt.monitor import MonitorManagementClient
 from azure.mgmt.resource import ResourceManagementClient
