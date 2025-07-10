@@ -57,4 +57,10 @@ for item in metrics.value:
     print(f"\nMetric: {item.name.localized_value}")
     for timeseries in item.timeseries:
         for data in timeseries.data:
-            print(f"  Time: {data.time_stamp} | Value: {data.average}")
+            value = data.average
+            if item.name.value.lower().startswith("storage") and value:
+                # Convert bytes to TB if the value is in bytes
+                tb_value = value / (1024 ** 4)
+                print(f"  Time: {data.time_stamp} | Value: {value:.2f} bytes ({tb_value:.4f} TB)")
+            else:
+                print(f"  Time: {data.time_stamp} | Value: {value}")
