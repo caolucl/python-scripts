@@ -58,7 +58,7 @@ for item in metrics.value:
     for timeseries in item.timeseries:
         for data in timeseries.data:
             value = data.average
-            if item.name.value.lower().startswith("storage") and value:
+            if "storage" in item.name.value.lower() and value:
                 # Convert bytes to TB if the value is in bytes
                 tb_value = value / (1024 ** 4)
                 print(f"  Time: {data.time_stamp} | Value: {value:.2f} bytes ({tb_value:.4f} TB)")
