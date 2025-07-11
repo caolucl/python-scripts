@@ -9,15 +9,35 @@ pip install azure-identity azure-mgmt-monitor
 
 #Ensure your script is running in an Azure environment with System Assigned Managed Identity enabled.
 
+# how to call the script
+python azure-sql-monitor-using-system-identity.py \
+  --subscription-id "xxxx" \
+  --resource-group "my-rg" \
+  --sql-server "my-server" \
+  --sql-db "mydb"
+
 from azure.identity import DefaultAzureCredential
 from azure.mgmt.monitor import MonitorManagementClient
 import datetime
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--subscription-id', required=True)
+parser.add_argument('--resource-group', required=True)
+parser.add_argument('--sql-server', required=True)
+parser.add_argument('--sql-db', required=True)
+args = parser.parse_args()
+
+subscription_id = args.subscription_id
+resource_group = args.resource_group
+sql_server = args.sql_server
+sql_db = args.sql_db
 
 # Azure resource identifiers
-subscription_id = "<your-subscription-id>"
-resource_group = "<your-resource-group>"
-sql_server = "<your-sql-server-name>"
-sql_db = "<your-sql-database-name>"
+#subscription_id = "<your-subscription-id>"
+#resource_group = "<your-resource-group>"
+#sql_server = "<your-sql-server-name>"
+#sql_db = "<your-sql-database-name>"
 
 # Azure SQL Database resource ID
 resource_id = (
