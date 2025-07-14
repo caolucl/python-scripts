@@ -15,6 +15,8 @@ SERVER={server};
 DATABASE={database};
 UID={username};
 PWD={password};
+Encrypt=yes;
+TrustServerCertificate=no;
 """
 conn = pyodbc.connect(conn_str)
 cursor = conn.cursor()
