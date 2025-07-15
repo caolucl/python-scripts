@@ -1,0 +1,74 @@
+import pyodbc
+
+# LogicMonitor auto-replaces this with the device IP or hostname
+server = "##HOSTNAME##"
+username = "your_user"
+password = "your_password"
+driver = '{ODBC Driver 17 for SQL Server}'
+default_db = "master"
+
+# Set up connection string
+conn_str = f"""
+DRIVER={driver};
+SERVER={server};
+DATABASE={default_db};
+UID={username};
+PWD={password};
+Encrypt=yes;
+TrustServerCertificate=yes;
+"""
+
+try:
+    conn = pyodbc.connect(conn_str, timeout=5)
+    cursor = conn.cursor()
+
+    # Get list of online user databases (exclude system ones)
+    db_query = """
+    SELECT name FROM sys.databases 
+    WHERE state_desc = 'ONLINE' AND name NOT IN ('master', 'tempdb', 'model', 'msdb')
+    """
+    cursor.execute(db_query)
+    dbs = [row[0] for row in cursor.fetchall()]
+
+    for db in dbs:
+        # Connect to that database
+        db_conn_str = conn_str.replace(f"DATABASE={default_db}", f"DATABASE={db}")
+        db_conn = pyodbc.connect(db_conn_str, timeout=5)
+        db_cursor = db_conn.cursor()
+
+        # Count active sessions
+        session_query = """
+        SELECT COUNT(session_id) 
+        FROM sys.dm_exec_sessions 
+        WHERE database_id = DB_ID()
+        """
+        db_cursor.execute(session_query)
+        conn_count = db_cursor.fetchone()[0]
+
+        print(f"{db}##active_connections##{conn_count}")
+
+        db_conn.close()
+
+    # Collect global CPU & memory (same across all DBs)
+    cpu_query = """
+    SELECT TOP 1 total_worker_time / 1000.0 AS cpu_ms
+    FROM sys.dm_exec_query_stats
+    ORDER BY total_worker_time DESC
+    """
+    cursor.execute(cpu_query)
+    row = cursor.fetchone()
+    if row:
+        print(f"global##cpu_ms##{row[0]:.2f}")
+
+    mem_query = """
+    SELECT SUM(pages_kb)/1024.0 AS memory_MB FROM sys.dm_os_memory_clerks
+    """
+    cursor.execute(mem_query)
+    row = cursor.fetchone()
+    if row:
+        print(f"global##memory_mb##{row[0]:.2f}")
+
+    conn.close()
+
+except Exception as e:
+    print(f"error##exception##{str(e)}")
