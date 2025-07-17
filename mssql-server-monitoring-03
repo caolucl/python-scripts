@@ -2,8 +2,8 @@ import pyodbc
 
 # LogicMonitor auto-replaces this with the device IP or hostname
 server = "##HOSTNAME##"
-username = "your_user"
-password = "your_password"
+username = os.getenv('LM_DEVICE_PROPERTY_sql.user')
+password = os.getenv('LM_DEVICE_PROPERTY_sql.pass')
 driver = '{ODBC Driver 17 for SQL Server}'
 default_db = "master"
 
