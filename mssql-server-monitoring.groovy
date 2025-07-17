@@ -68,6 +68,17 @@ try {
             }
             println "${dbName}##log_file_gb##${String.format('%.2f', logGb)}"
 
+            // --- 4. CPU Time (ms) ---
+            def cpuTime = 0
+            dbSql.eachRow("""
+                SELECT SUM(cpu_time) AS cpu_ms
+                FROM sys.dm_exec_requests
+                WHERE database_id = DB_ID()
+            """) {
+                cpuTime = it.cpu_ms ?: 0
+            }
+            println "${dbName}##cpu_ms##${cpuTime}"
+
         } catch (Exception dbEx) {
             println "${dbName}##error##${dbEx.message}"
         } finally {
