@@ -59,6 +59,15 @@ try:
         size_gb = size_mb / 1024 if size_mb is not None else 0
         print(f"{db}##storage_gb##{size_gb:.2f}")
 
+        # --- 3. Log File Size (GB) ---
+        db_cursor.execute("""
+        SELECT SUM(size) * 8.0 / 1024 / 1024
+        FROM sys.master_files
+        WHERE type_desc = 'LOG' AND database_id = DB_ID()
+        """)
+        log_file_gb = db_cursor.fetchone()[0] or 0
+        print(f"{db}##log_file_gb##{log_file_gb:.2f}")
+
         db_conn.close()
 
     # Collect global CPU & memory (same across all DBs)
