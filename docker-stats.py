@@ -13,7 +13,7 @@ def monitor_containers():
             percpu = stats["cpu_stats"]["cpu_usage"].get("percpu_usage")
             num_cpus = len(percpu) if percpu else 1
 
-            # Calculate CPU usage %
+            # Calculate CPU usage
             cpu_delta = stats["cpu_stats"]["cpu_usage"]["total_usage"] - stats["precpu_stats"]["cpu_usage"]["total_usage"]
             system_delta = stats["cpu_stats"]["system_cpu_usage"] - stats["precpu_stats"]["system_cpu_usage"]
 
@@ -23,13 +23,16 @@ def monitor_containers():
 
             # Memory usage
             mem_usage = stats["memory_stats"].get("usage", 0)
-            mem_limit = stats["memory_stats"].get("limit", 1)  # Avoid division by 0
+            mem_limit = stats["memory_stats"].get("limit", 1)
             mem_percent = (mem_usage / mem_limit) * 100.0
 
-            print(f"\nContainer: {container.name}")
-            print(f"  CPU Usage: {cpu_percent:.2f}%")
-            print(f"  Memory Usage: {mem_usage / 1024 / 1024:.2f} MB / {mem_limit / 1024 / 1024:.2f} MB ({mem_percent:.2f}%)")
+            # CPU usage in seconds
+            cpu_usage_in_seconds = cpu_delta / 1000000000  # from nanoseconds
 
+            print(f"{container.name}.CPU_Used_Sec={cpu_usage_in_seconds:.6f}")
+            print(f"{container.name}.CPU_Usage_Percent={cpu_percent:.2f}")
+            print(f"{container.name}.Memory_Usage_MB={mem_usage / 1024 / 1024:.2f}")
+        
         except Exception as e:
             print(f"Failed to fetch stats for {container.name}: {e}")
 
