@@ -27,7 +27,21 @@ try {
     """) {
         dbs << it.name
     }
-
+    sql.eachRow("""
+        SELECT 
+            DB_NAME(st.dbid) AS db_name,
+            SUM(qs.total_worker_time) / 1000000.0 AS cpu_time_sec
+        FROM sys.dm_exec_query_stats qs
+        CROSS APPLY sys.dm_exec_sql_text(qs.sql_handle) st
+        WHERE DB_NAME(st.dbid) IS NOT NULL
+        GROUP BY DB_NAME(st.dbid)
+        ORDER BY cpu_time_sec DESC
+    """) {
+        def dbName = it.db_name
+        def cpuSec  = it.cpu_time_sec ?: 0
+        println "${dbName}.cpu_time_sec=${String.format('%.2f', cpuSec)}"
+    }
+    
     // Loop through each DB
     dbs.each { dbName ->
         def dbSql = null
