@@ -1,16 +1,15 @@
 #!/bin/bash
 
 folder="/path/to/folder"
+log_file="/path/to/logs/delete_$(date +%Y-%m-%d).log"
 
 for file in "$folder"/*; do
-    # Skip if not a regular file
     [ -f "$file" ] || continue
 
-    # Check if file is in use
     if lsof "$file" > /dev/null 2>&1; then
-        echo "Skipping (in use): $file"
+        echo "$(date '+%F %T') - Skipped (in use): $file" >> "$log_file"
     else
-        echo "Deleting: $file"
+        echo "$(date '+%F %T') - Deleting: $file" >> "$log_file"
         rm -f "$file"
     fi
 done
